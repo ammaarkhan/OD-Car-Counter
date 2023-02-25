@@ -25,9 +25,13 @@ model = YOLO("../Yolo-Weights/yolov8n.pt")
 # tracking:
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
-line = [320, 337, 673, 337]
+lineL = [340, 337, 473, 337]
+lineM =[480, 337, 590, 337]
+lineR = [597, 337, 700, 337]
 
-numCount = []
+numCountL = []
+numCountM = []
+numCountR = []
 
 while True:
     success, img = cap.read()
@@ -58,7 +62,9 @@ while True:
                 detections = np.vstack((detections, currentArray))
 
     resultTracker = tracker.update(detections)
-    cv2.line(img, (line[0], line[1]), (line[2], line[3]), (0,0,255), 5)
+    cv2.line(img, (lineL[0], lineL[1]), (lineL[2], lineL[3]), (0, 0, 255), 5)
+    cv2.line(img, (lineM[0], lineM[1]), (lineM[2], lineM[3]), (0, 0, 255), 5)
+    cv2.line(img, (lineR[0], lineR[1]), (lineR[2], lineR[3]), (0, 0, 255), 5)
 
     for result in resultTracker:
         x1, y1, x2, y2, id = result
@@ -72,13 +78,24 @@ while True:
         cx, cy = x1+w//2, y1+h//2
         cv2.circle(img, (cx,cy), 5, (255,0,255), cv2.FILLED)
 
-        if line[0] < cx < line[2] and line[1] - 20 < cy < line[1] + 20:
-            if numCount.count(id) == 0:
-                numCount.append(id)
-                cv2.line(img, (line[0], line[1]), (line[2], line[3]), (0, 255, 0), 5)
+        if lineL[0] < cx < lineL[2] and lineL[1] - 20 < cy < lineL[1] + 20:
+            if numCountL.count(id) == 0:
+                numCountL.append(id)
+                cv2.line(img, (lineL[0], lineL[1]), (lineL[2], lineL[3]), (0, 255, 0), 5)
+        elif lineM[0] < cx < lineM[2] and lineM[1] - 20 < cy < lineM[1] + 20:
+            if numCountM.count(id) == 0:
+                numCountM.append(id)
+                cv2.line(img, (lineM[0], lineM[1]), (lineM[2], lineM[3]), (0, 255, 0), 5)
+        elif lineR[0] < cx < lineR[2] and lineR[1] - 20 < cy < lineR[1] + 20:
+            if numCountR.count(id) == 0:
+                numCountR.append(id)
+                cv2.line(img, (lineR[0], lineR[1]), (lineR[2], lineR[3]), (0, 255, 0), 5)
 
 
-    cvzone.putTextRect(img, f'Count: {len(numCount)}', (40, 40))
+
+    cvzone.putTextRect(img, f'Left Lane: {len(numCountL)}', (20, 40))
+    cvzone.putTextRect(img, f'Mid Lane: {len(numCountM)}', (20, 80))
+    cvzone.putTextRect(img, f'Right Lane: {len(numCountR)}', (20, 120))
 
     cv2.imshow('Image', img)
     # cv2.imshow('ImageRegion', imgRegion)
