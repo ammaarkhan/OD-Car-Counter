@@ -27,7 +27,7 @@ tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
 line = [320, 337, 673, 337]
 
-numCount = 0
+numCount = []
 
 while True:
     success, img = cap.read()
@@ -73,10 +73,13 @@ while True:
         cv2.circle(img, (cx,cy), 5, (255,0,255), cv2.FILLED)
 
         if line[0] < cx < line[2] and line[1] - 20 < cy < line[1] + 20:
-            numCount += 1
+            if numCount.count(id) == 0:
+                numCount.append(id)
+                cv2.line(img, (line[0], line[1]), (line[2], line[3]), (0, 255, 0), 5)
 
-    cvzone.putTextRect(img, f'Count: {numCount}', (40, 40))
+
+    cvzone.putTextRect(img, f'Count: {len(numCount)}', (40, 40))
 
     cv2.imshow('Image', img)
     # cv2.imshow('ImageRegion', imgRegion)
-    cv2.waitKey(0)
+    cv2.waitKey(1)
