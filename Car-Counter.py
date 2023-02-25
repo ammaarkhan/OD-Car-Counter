@@ -3,9 +3,10 @@ import cv2
 import cvzone
 import math
 
-cap = cv2.VideoCapture("Videos/people.mp4") # for video
+cap = cv2.VideoCapture("Videos/cars.mp4") # for video
+mask = cv2.imread("mask.png")
 
-model = YOLO("../Yolo-Weights/yolov5l.pt")
+model = YOLO("../Yolo-Weights/yolov8n.pt")
 
 classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
               "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
@@ -21,23 +22,28 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
 
 while True:
     success, img = cap.read()
-    results = model(img, stream=True)
+    imgRegion = cv2.bitwise_and(img, mask) # overlay canva mask onto video
+    results = model(imgRegion, stream=True)
     for r in results:
         boxes = r.boxes
         for box in boxes:
             # finding the bounding box
             x1, y1, x2, y2 = box.xyxy[0]
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-            cv2.rectangle(img, (x1,y1), (x2,y2), (255,0,255), 3)
+
 
             # finding the confidence value
             conf = math.ceil((box.conf[0]*100))/100
 
             # class name
             cls = int(box.cls[0])
-            cvzone.putTextRect(img, f'{classNames[cls]} {conf}', (max(0, x1), max(35, y1 - 20)), scale=1, thickness=1)
+            currentClass = classNames[cls]
 
+            if currentClass == "car" and conf > 0.4:
+                cv2.rectangle(imgRegion, (x1, y1), (x2, y2), (255, 0, 255), 3)
+                cvzone.putTextRect(imgRegion, f'{currentClass} {conf}', (max(0, x1), max(35, y1 - 20)),
+                                   scale=1, thickness=1, offset=5)
 
-    cv2.imshow('Image', img)
-
-    cv2.waitKey(1)
+    # cv2.imshow('Image', img)
+    cv2.imshow('ImageRegion', imgRegion)
+    cv2.waitKey(0)
