@@ -17,7 +17,7 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
               "teddy bear", "hair drier", "toothbrush"
               ]
 
-cap = cv2.VideoCapture("Videos/cars.mp4") # for video
+cap = cv2.VideoCapture("Videos/cars.mp4")  # for video
 mask = cv2.imread("mask.png")
 
 model = YOLO("../Yolo-Weights/yolov8n.pt")
@@ -26,7 +26,7 @@ model = YOLO("../Yolo-Weights/yolov8n.pt")
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
 lineL = [340, 337, 473, 337]
-lineM =[480, 337, 590, 337]
+lineM = [480, 337, 590, 337]
 lineR = [597, 337, 700, 337]
 
 numCountL = []
@@ -35,10 +35,10 @@ numCountR = []
 
 while True:
     success, img = cap.read()
-    imgRegion = cv2.bitwise_and(img, mask) # overlay canva mask onto video
+    imgRegion = cv2.bitwise_and(img, mask)  # overlay canva mask onto video
     results = model(imgRegion, stream=True)
 
-    detections = np.empty((0,5))
+    detections = np.empty((0, 5))
     for r in results:
         boxes = r.boxes
         for box in boxes:
@@ -46,9 +46,8 @@ while True:
             x1, y1, x2, y2 = box.xyxy[0]
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-
             # finding the confidence value
-            conf = math.ceil((box.conf[0]*100))/100
+            conf = math.ceil((box.conf[0] * 100)) / 100
 
             # class name
             cls = int(box.cls[0])
@@ -75,8 +74,8 @@ while True:
         cvzone.putTextRect(img, f'{id}', (max(0, x1), max(35, y1)),
                            scale=2, thickness=3, offset=6)
 
-        cx, cy = x1+w//2, y1+h//2
-        cv2.circle(img, (cx,cy), 5, (255,0,255), cv2.FILLED)
+        cx, cy = x1 + w // 2, y1 + h // 2
+        cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
 
         if lineL[0] < cx < lineL[2] and lineL[1] - 20 < cy < lineL[1] + 20:
             if numCountL.count(id) == 0:
@@ -90,8 +89,6 @@ while True:
             if numCountR.count(id) == 0:
                 numCountR.append(id)
                 cv2.line(img, (lineR[0], lineR[1]), (lineR[2], lineR[3]), (0, 255, 0), 5)
-
-
 
     cvzone.putTextRect(img, f'Left Lane: {len(numCountL)}', (20, 40))
     cvzone.putTextRect(img, f'Mid Lane: {len(numCountM)}', (20, 80))
